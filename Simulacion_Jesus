@@ -1,0 +1,60 @@
+Created on Sun May 28 21:43:28 2023
+
+@author: Yisus
+"""
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+def simulate_trajectory(m, gamma, temperature, dt, total_time, inertia=True):
+    n_steps = int(total_time / dt)
+    t = np.linspace(0, total_time, n_steps)
+    
+    r = np.zeros((n_steps, 2))  # Array to store positions (x, y)
+    v = np.zeros((n_steps, 2))  # Array to store velocities (v_x, v_y)
+    
+    # Generate random numbers for W
+    np.random.seed(42)  # For reproducibility
+    w = np.random.normal(0, 1, (n_steps, 2))
+    
+    for i in range(1, n_steps):
+        # Calculate W term
+        W = w[i] / np.sqrt(dt)
+        
+        # Calculate forces
+        if inertia:
+            f = -gamma * v[i-1] + np.sqrt(2 * m * gamma**2 * temperature / (m * R)) * W
+            label = 'With Inertia'
+        else:
+            f = np.sqrt(2 * m * gamma**2 * temperature / (m * R)) * W
+            label = 'No Inertia'
+            v[i] = v[i-1] + f * dt  # Update velocity directly (no inertia)
+        
+        # Update positions
+        r[i] = r[i-1] + v[i] * dt
+        
+        # Plot current position
+        plt.clf()  # Clear the previous plot
+        plt.plot(r[:i, 0], r[:i, 1], label=label)
+        plt.xlabel('x')
+        plt.ylabel('y')
+        plt.title('Particle Trajectories')
+        plt.legend()
+        plt.grid(True)
+        plt.show(block=False)  # Show the plot without blocking
+
+        plt.pause(0.01)  # Pause briefly to allow the plot to update
+
+# Simulation parameters
+m = 1.0
+gamma = 6 * np.pi * 0.001
+temperature = 1.0
+dt = 0.01
+total_time = 10.0
+R = 8.314  # Constante de los gases ideales
+
+# Simulate trajectory without inertia
+simulate_trajectory(m, gamma, temperature, dt, total_time, inertia=False)
+
+# Simulate trajectory with inertia
+simulate_trajectory(m, gamma, temperature, dt, total_time, inertia=True)
